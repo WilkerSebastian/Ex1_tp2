@@ -295,5 +295,16 @@ void Allocator::printMemoryMap()
 
 }
 
+void Allocator::exit()
+{
+
+    if (_instance == nullptr)
+        return;
+    
+    delete _instance; 
+    _instance = nullptr;
+
+}
+
 } // end namespace tcii::ex
 
