@@ -1,4 +1,6 @@
 #include "GC.h"
+#include <iostream>
+#include <cstdint>
 
 namespace tcii::ex
 { // begin namespace tcii::ex
@@ -251,6 +253,45 @@ void Allocator::free(void* p)
         newFooter->prev = leftNeighbor;
 
     }
+
+}
+
+void Allocator::printMemoryMap()
+{
+
+    std::cout << "--- Memory Map ---\n";
+
+    if (_heap == nullptr)
+    {
+
+        std::cout << "Heap not initialized.\n";
+        return;
+
+    }
+
+    char* current_p = static_cast<char*>(_heap);
+    unsigned total_free_memory = 0;
+    const unsigned heap_end = reinterpret_cast<uintptr_t>(_heap) + heapSize;
+
+    while (reinterpret_cast<uintptr_t>(current_p) < heap_end)
+    {
+
+        BlockInfo* block = reinterpret_cast<BlockInfo*>(current_p);
+
+        std::cout << "Block at " << static_cast<void*>(block)
+                << "\t | Flag: " << (block->flag == 0 ? "FREE" : "ALLOCATED")
+                << "\t | Size: " << block->size << " bytes\n";
+
+        if (block->flag == 0) 
+            total_free_memory += block->size;
+        
+        current_p += sizeof(BlockInfo) * 2 + block->size;
+
+    }
+
+    std::cout << std::string(20, '-') << "\n";
+    std::cout << "Total available memory: " << total_free_memory << " bytes\n";
+    std::cout << std::string(20, '-') << "\n\n";
 
 }
 
