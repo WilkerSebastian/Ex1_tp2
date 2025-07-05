@@ -114,7 +114,7 @@ inline void testCoalescing() {
     Allocator::free(p3); 
     Allocator::printMemoryMap();
 
-    std::cout << "--- Test 4: No neighbors to merge (verifying initial state) ---\n";
+    std::cout << "--- Test 4: No neighbors to merge ---\n";
     std::cout << "Freeing p1\n";
 
     Allocator::free(p1);
