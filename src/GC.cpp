@@ -147,5 +147,112 @@ T* Allocator::allocate(unsigned n)
 
 }
 
+void Allocator::free(void* p)
+{
+  
+    if (p == nullptr)
+        return;
+
+    BlockInfo* blockToFree = static_cast<BlockInfo*>(p) - 1;
+
+    if (blockToFree->flag == 0)
+        return;
+    
+
+    BlockInfo* leftNeighbor = nullptr;
+    BlockInfo* rightNeighbor = nullptr;
+
+    const unsigned headerFooterSize = sizeof(BlockInfo);
+
+    BlockInfo* prevFooter = reinterpret_cast<BlockInfo*>(
+        reinterpret_cast<char*>(blockToFree) - headerFooterSize
+    );
+   
+    
+    if (reinterpret_cast<void*>(prevFooter) >= _heap)
+    {
+
+        if (prevFooter->flag == 0) 
+            leftNeighbor = prevFooter->prev; 
+        
+    }
+
+    BlockInfo* nextHeader = reinterpret_cast<BlockInfo*>(
+        reinterpret_cast<char*>(blockToFree + 1) + blockToFree->size
+    );
+
+    
+    if (reinterpret_cast<void*>(nextHeader)<static_cast<char*>(_heap) + heapSize)
+    {
+
+        if (nextHeader->flag == 0) 
+            rightNeighbor = nextHeader;
+        
+    }
+
+    if (leftNeighbor == nullptr && rightNeighbor == nullptr) 
+    {
+
+        blockToFree->flag = 0;
+        blockToFree->next = _free_list_head;
+        blockToFree->prev = _free_list_head->prev;
+        _free_list_head->prev->next = blockToFree;
+        _free_list_head->prev = blockToFree;
+
+    }
+    else if (leftNeighbor != nullptr && rightNeighbor == nullptr)
+    {
+        
+        leftNeighbor->size += blockToFree->size + (headerFooterSize * 2);
+
+        BlockInfo* newFooter = reinterpret_cast<BlockInfo*>(
+            reinterpret_cast<char*>(leftNeighbor + 1) + leftNeighbor->size
+        );
+
+        newFooter->flag = 0;
+        newFooter->prev = leftNeighbor;
+
+    }
+    else if (leftNeighbor == nullptr && rightNeighbor != nullptr) 
+    {
+        
+        rightNeighbor->prev->next = rightNeighbor->next;
+        rightNeighbor->next->prev = rightNeighbor->prev;
+
+        blockToFree->size += rightNeighbor->size + (headerFooterSize * 2);
+        blockToFree->flag = 0;
+        
+        BlockInfo* newFooter = reinterpret_cast<BlockInfo*>(
+            reinterpret_cast<char*>(blockToFree + 1) + blockToFree->size
+        );
+
+        newFooter->flag = 0;
+        newFooter->prev = blockToFree;
+
+        blockToFree->next = _free_list_head;
+        blockToFree->prev = _free_list_head->prev;
+        _free_list_head->prev->next = blockToFree;
+        _free_list_head->prev = blockToFree;
+
+    }
+    else 
+    {
+        
+        rightNeighbor->prev->next = rightNeighbor->next;
+        rightNeighbor->next->prev = rightNeighbor->prev;
+
+        leftNeighbor->size += blockToFree->size + rightNeighbor->size + (headerFooterSize * 4);
+
+        BlockInfo* newFooter = reinterpret_cast<BlockInfo*>(
+            reinterpret_cast<char*>(leftNeighbor + 1) + leftNeighbor->size
+        );
+
+        newFooter->flag = 0;
+        newFooter->prev = leftNeighbor;
+
+    }
+
+}
+
 } // end namespace tcii::ex
 
