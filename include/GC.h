@@ -39,7 +39,14 @@ public:
 
 private:
   static Allocator* _instance;
-  // insert your code here
+  static void* _heap;              
+  static BlockInfo* _free_list_head; 
+
+  Allocator();
+  ~Allocator();
+  
+  Allocator(const Allocator&) = delete;
+  Allocator& operator=(const Allocator&) = delete;
 
 }; // Allocator
 

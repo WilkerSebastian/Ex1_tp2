@@ -8,9 +8,20 @@ namespace tcii::ex
 //
 // Allocator implementation
 // =========
-Allocator* Allocator::_instance;
+Allocator* Allocator::_instance = nullptr;
+void* Allocator::_heap = nullptr;
+BlockInfo* Allocator::_free_list_head = nullptr;
 
-// insert your code here
+Allocator::Allocator()
+{
+  _heap = nullptr;
+  _free_list_head = nullptr;
+}
+
+Allocator::~Allocator()
+{
+}
+
 
 } // end namespace tcii::ex
 
